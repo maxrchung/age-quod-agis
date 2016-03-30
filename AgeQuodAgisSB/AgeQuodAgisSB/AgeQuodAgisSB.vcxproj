@@ -81,7 +81,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Beatmap.cpp" />
+    <ClCompile Include="Hold.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Note.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Beatmap.hpp" />
+    <ClInclude Include="Hold.hpp" />
+    <ClInclude Include="Note.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
