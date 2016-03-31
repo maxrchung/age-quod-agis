@@ -29,7 +29,19 @@ int main() {
 
 	// Deal with notes
 	for (auto note : Beatmap::Instance()->notes) {
+		// Explosion
 		if (note->lane == 1) {
+			
+		}
+		// Scale
+		else if (note->lane == 2) {
+
+		}
+		// Color
+		else if (note->lane == 3) {
+
+		}
+		else {
 
 		}
 	}
