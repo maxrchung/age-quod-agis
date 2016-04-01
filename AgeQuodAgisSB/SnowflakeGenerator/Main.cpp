@@ -27,7 +27,7 @@ void renderSnowflake(std::string fileName, std::string inputDirectory, std::stri
 	sf::RenderTexture render;
 	sf::Vector2f imageSize(1000.0f, 1000.0f);
 	sf::Vector2f midSize(imageSize.x / 2, imageSize.y / 2);
-	render.create(imageSize.x, imageSize.y);
+	render.create((int) imageSize.x, (int) imageSize.y);
 
 	sf::Image snowflakeImage;
 	std::string inputPath = inputDirectory + fileName;

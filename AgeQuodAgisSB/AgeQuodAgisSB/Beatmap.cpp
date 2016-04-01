@@ -1,4 +1,5 @@
 #include "Beatmap.hpp"
+#include "Hold.hpp"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -50,7 +51,7 @@ void Beatmap::ParseHitObjects(std::string& beatmapPath) {
 			int holdEnd;
 			options >> holdEnd;
 
-			holds.push_back(new Hold(lane, timing, holdEnd));
+			notes.push_back(new Hold(lane, timing, holdEnd));
 		}
 		else {
 			notes.push_back(new Note(lane, timing));

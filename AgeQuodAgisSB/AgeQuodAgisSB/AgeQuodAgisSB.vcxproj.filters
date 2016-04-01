@@ -21,10 +21,10 @@
     <ClCompile Include="Note.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Hold.cpp">
+    <ClCompile Include="Beatmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Beatmap.cpp">
+    <ClCompile Include="Hold.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
