@@ -55,11 +55,11 @@ float dtor(int degrees) {
 
 // Colors decrease and increase by a set amount each time a certain lane is pressed
 // Front colors (centerpiece + particles) are lighter, while the background is darker
-int frontValueMin = 200;
-int frontValueMax = 255;
-int frontValue = frontValueMax;
+int frontValueMin = 100;
+int frontValueMax = 155;
+int frontValue = frontValueMin;
 int frontValueChange = 5;
-bool frontValueIncrease = false;
+bool frontValueIncrease;
 
 Color getFrontColor() {
 	if (frontValue == frontValueMin) {
@@ -79,11 +79,11 @@ Color getFrontColor() {
 	return Color(frontValue);
 }
 
-int backValueMin = 0;
-int backValueMax = 55;
-int backValue = backValueMin;
+int backValueMin = 200;
+int backValueMax = 255;
+int backValue = backValueMax;
 int backValueChange = 5;
-bool backValueIncrease = true;
+bool backValueIncrease;
 
 Color getBackColor() {
 	if (backValue == backValueMin) {
@@ -146,7 +146,7 @@ Sprite* centerpiece = new Sprite("Snowflakes/centerpiece.png", midpoint);
 
 // Returns the timing of the specified lane from an index
 int getNextLane(int lane, int index) {
-	for (int i = index; i < Beatmap::Instance()->notes.size(); ++i) {
+	for (int i = index + 1; i < Beatmap::Instance()->notes.size(); ++i) {
 		if (Beatmap::Instance()->notes[i]->lane == lane) {
 			return Beatmap::Instance()->notes[i]->start - offset;
 		}
@@ -156,11 +156,12 @@ int getNextLane(int lane, int index) {
 
 int main() {
 	// Background setup
+	background->Color(songStartOffset, songStart, Color(backValue), Color(backValue));
 	background->Fade(songStartOffset, songStart, 0.0f, 1.0f);
 	background->Fade(songEnd, songEndOffset, 1.0f, 0.0f);
 
 	// Centerpiece setup
-	centerpiece->Color(songStartOffset, songStart, Color(255), Color(255));
+	centerpiece->Color(songStartOffset, songStart, Color(frontValue), Color(frontValue));
 	centerpiece->Fade(songStartOffset, songStart, 0.0f, 1.0f);
 	centerpiece->Fade(songEnd, songEndOffset, 1.0f, 0.0f);
 
@@ -226,10 +227,12 @@ int main() {
 					}
 					particle->Rotate(particleStart, particleRotateEnd, radians, radians);
 
+					float partialRatio = (float) (particleRotateEnd - particleStart) / (particleEnd - particleStart);
+					float partialDistance = partialRatio * particleDistance;
 					// Because we have to be precise with our start/end times, this move may not go the full distance
 					Vector2 startPos(midpoint.x + cos(radians) * particleBuffer, midpoint.y + sin(radians) * particleBuffer);
-					Vector2 endPos(midpoint.x + cos(radians) * particleDistance, midpoint.y + sin(radians) * particleDistance);
-					particle->Move(particleStart, particleEnd, startPos, endPos);
+					Vector2 endPos(midpoint.x + cos(radians) * partialDistance, midpoint.y + sin(radians) * partialDistance);
+					particle->Move(particleStart, particleRotateEnd, startPos, endPos);
 
 					int particleColorEnd = getNextLane(colorLane, n);
 					if (particleColorEnd > particleEnd) {
@@ -249,10 +252,10 @@ int main() {
 			Color frontColor = getFrontColor();
 			Color backColor = getBackColor();
 
-			background->Color(startOffset, endOffset, background->color, backColor);
-			centerpiece->Color(startOffset, endOffset, centerpiece->color, frontColor);
+			background->Color(startOffset, note->end, background->color, backColor);
+			centerpiece->Color(startOffset, note->end, centerpiece->color, frontColor);
 			for (auto particle : particles) {
-				particle->Color(startOffset, endOffset, particle->color, frontColor);
+				particle->Color(startOffset, note->end, particle->color, frontColor);
 			}
 		}
 
@@ -260,11 +263,39 @@ int main() {
 		else if (note->lane == rotateLane) {
 			int degrees = rotateAmount;
 			float radians = dtor(degrees);
-			centerpiece->Rotate(startOffset, endOffset, centerpiece->rotation, centerpiece->rotation + radians);
+			centerpiece->Rotate(startOffset, note->end, centerpiece->rotation, centerpiece->rotation + radians);
 
 			for (auto particle : particles) {
-				particle->Rotate(startOffset, endOffset, particle->rotation, particle->rotation + radians);
-				particle->Move(note->start, particle->endTime, particle->position, Vector2(500, 500));
+				// Finding timeRemaining
+				// partialDist / totalDist = (totalTime - timeRemaining) / totalTime
+				// partialDist * totalTime / totalDist = totalTime - timeRemaining
+				// timeRemaining = totalTime - partialDist * totalTime/totalDist
+				float currentDistance = (particle->position - midpoint).Magnitude();
+				float partialDist = currentDistance - particleBuffer;
+				float totalDist = particleDistance - particleBuffer;
+				float totalTime = particleFadeOut;
+				float timeRemaining = totalTime - partialDist * totalTime / totalDist;
+
+				int particleEnd = startOffset + timeRemaining;
+				int particleRotateEnd = getNextLane(rotateLane, n);
+
+				float absoluteRotation = particle->rotation + radians;
+				Vector2 rotatedPos(midpoint.x + cos(absoluteRotation) * particleDistance, midpoint.y + sin(absoluteRotation) * particleDistance);
+
+				if (particleRotateEnd < particleEnd) {
+					Vector2 particlePath = rotatedPos - particle->position;
+					particlePath.Normalize();
+
+					float partialRatio = (float) (particleRotateEnd - startOffset) / (particleEnd - startOffset);
+					particlePath *= partialRatio;
+					rotatedPos = particle->position + particlePath;
+					particle->Move(startOffset, particleRotateEnd, particle->position, rotatedPos);
+				}
+				else {
+					particle->Move(startOffset, particleEnd, particle->position, rotatedPos);
+				}
+
+				particle->Rotate(startOffset, note->end, particle->rotation, particle->rotation + radians);
 			}
 		}
 	}
@@ -274,6 +305,6 @@ int main() {
 	// Output to storyboard file
 	Storyboard::Instance()->Write(storyboardPath);
 	std::cout << "Finished storyboard generation" << std::endl;
-	std::cin.get();
+	// std::cin.get();
 	return 0;
 }
