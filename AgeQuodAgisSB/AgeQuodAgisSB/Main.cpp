@@ -300,8 +300,6 @@ int main() {
 		}
 	}
 
-	// Music spectrum?
-
 	// Output to storyboard file
 	Storyboard::Instance()->Write(storyboardPath);
 	std::cout << "Finished storyboard generation" << std::endl;
