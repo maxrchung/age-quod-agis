@@ -5,74 +5,86 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 // WAV Resources
 // Guide: http://rogerchansdigitalworld.blogspot.com/2010/05/how-to-read-wav-format-file-in-c.html
 // WAV format: http://soundfile.sapp.org/doc/WaveFormat/wav-sound-format.gif
-class WavData {
+class Wav {
 public:
+	char chunkId[5];
+	unsigned long chunkSize;
+	char format[5];
+	char subchunk1Id[5];
+	unsigned long subchunk1Size;
+	short audioFormat;
+	short numChannels;
+	unsigned long sampleRate;
+	unsigned long byteRate;
+	short blockAlign;
+	short bitsPerSample;
+	char subchunk2Id[5];
+	unsigned long subchunk2Size;
 	short* data;
-	unsigned long size;
 
-	WavData() {
-		data = NULL;
-		size = 0;
-	}
+	std::string header() {
+		std::stringstream ss;
+		ss << "chunkId: " << chunkId << std::endl;
+		ss << "chunkSize: " << chunkSize << std::endl;
+		ss << "format: " << format << std::endl;
+		ss << "subchunk1Id: " << subchunk1Id << std::endl;
+		ss << "subchunk1Size: " << subchunk1Size << std::endl;
+		ss << "audioFormat: " << audioFormat << std::endl;
+		ss << "numChannels: " << numChannels << std::endl;
+		ss << "sampleRate: " << sampleRate << std::endl;
+		ss << "byteRate: " << byteRate << std::endl;
+		ss << "blockAlign: " << blockAlign << std::endl;
+		ss << "bitsPerSample: " << bitsPerSample << std::endl;
+		ss << "subchunk2Id: " << subchunk2Id << std::endl;
+		ss << "subchunk2Size: " << subchunk2Size << std::endl;
 
-	std::string toString() {
-		return "";
+		return ss.str();
 	}
 };
 
-void loadWavFile(char* fname, WavData* ret) {
+Wav loadWavFile(char* fname) {
 	FILE* fp = fopen(fname, "rb");
-	if (fp) {
-		char id[5];
-		unsigned long size;
-		short format_tag, channels, block_align, bits_per_sample;
-		unsigned long format_length, sample_rate, avg_bytes_sec, data_size;
+	Wav wavData;
 
-		fread(id, sizeof(char), 4, fp);
-		id[4] = '\0';
+	fread(wavData.chunkId, sizeof(char), 4, fp);
+	wavData.chunkId[4] = '\0';
+	fread(&wavData.chunkSize, sizeof(unsigned long), 1, fp);
+	fread(wavData.format, sizeof(char), 4, fp);
+	wavData.format[4] = '\0';
 
-		if (!strcmp(id, "RIFF")) {
-			fread(&size, sizeof(unsigned long), 1, fp);
-			fread(id, sizeof(char), 4, fp);
-			id[4] = '\0';
+	fread(wavData.subchunk1Id, sizeof(char), 4, fp);
+	wavData.subchunk1Id[4] = '\0';
+	fread(&wavData.subchunk1Size, sizeof(unsigned long), 1, fp);
+	fread(&wavData.audioFormat, sizeof(short), 1, fp);
+	fread(&wavData.numChannels, sizeof(short), 1, fp);
+	fread(&wavData.sampleRate, sizeof(unsigned long), 1, fp);
+	fread(&wavData.byteRate, sizeof(unsigned long), 1, fp);
+	fread(&wavData.blockAlign, sizeof(short), 1, fp);
+	fread(&wavData.bitsPerSample, sizeof(short), 1, fp);
 
-			if (!strcmp(id, "WAVE")) {
-				fread(id, sizeof(char), 4, fp);
-				fread(&format_length, sizeof(unsigned long), 1, fp);
-				fread(&format_tag, sizeof(short), 1, fp);
-				fread(&channels, sizeof(short), 1, fp);
-				fread(&sample_rate, sizeof(unsigned long), 1, fp);
-				fread(&avg_bytes_sec, sizeof(unsigned long), 1, fp);
-				fread(&block_align, sizeof(short), 1, fp);
-				fread(&bits_per_sample, sizeof(short), 1, fp);
-				fread(id, sizeof(char), 4, fp);
-				fread(&data_size, sizeof(unsigned long), 1, fp);
+	fread(wavData.subchunk2Id, sizeof(char), 4, fp);
+	wavData.subchunk2Id[4] = '\0';
+	fread(&wavData.subchunk2Size, sizeof(unsigned long), 1, fp);
+	wavData.subchunk2Size /= sizeof(short);
+	wavData.data = (short*)malloc(wavData.subchunk2Size);
+	fread(wavData.data, sizeof(short), wavData.subchunk2Size, fp);
 
-				ret->size = data_size / sizeof(short);
-				ret->data = (short*)malloc(data_size);
-				fread(ret->data, sizeof(short), ret->size, fp);
-			}
-			else {
-				std::cout << "Error: RIFF file but not a wave file\n";
-			}
-		}
-		else {
-			std::cout << "Error: not a RIFF file\n";
-		}
-	}
 	fclose(fp);
+
+	return wavData;
 }
 
 int main() {
 	char* filePath = R"(X:\Music\void\Age quod agis\ageQuodAgis.wav)";
 
-	WavData song;
-	loadWavFile(filePath, &song);
-	std::cout << "there are " << song.size / 2 << " samples in this WAV file." << std::endl;
+	Wav song = loadWavFile(filePath);
+	std::cout << "There are " << song.subchunk2Size / 2 << " samples in this WAV file." << std::endl;
+	std::cout << song.header() << std::endl;
 	std::cin.get();
 	return 0;
 }
