@@ -121,10 +121,10 @@ int main() {
 	}
 
 	int progressRate = song.sampleRate / 10;
-	for (int j = 0; j < song.size; j += progressRate) {
+	for (int j = progressRate; j < song.size; j += progressRate) {
 		float* input = (float*)malloc(N * sizeof(float));
 		for (int i = 0; i < N; ++i) {
-			input[i] = hann(song.data[i + j], i, N);
+			input[i] = hann(song.data[i + j - (N / 2)], i, N);
 		}
 		
 		kiss_fft_cpx in[N], out[N];
@@ -132,6 +132,7 @@ int main() {
 			in[i].r = input[i];
 			in[i].i = 0.0f;
 		}
+
 		kiss_fft_cfg cfg = kiss_fft_alloc(N, 0, NULL, NULL);
 		kiss_fft(cfg, in, out);
 		free(cfg);
@@ -140,7 +141,7 @@ int main() {
 			float magnitudeSquared = out[i].r * out[i].r + out[i].i * out[i].i;
 			float dB = 10.0f * log10(magnitudeSquared);
 			int endTime = (j / progressRate) * 100;
-			bars[i]->ScaleVector(bars[i]->endTime, endTime, bars[i]->scaleVector, Vector2(barWidth, (dB / 96.0f) / 5.0f));
+			bars[i]->ScaleVector(bars[i]->endTime, endTime, bars[i]->scaleVector, Vector2(barWidth, (dB / 96.0f) / 8.0f));
 		}
 	}
 
