@@ -4,7 +4,9 @@
 
 #define _USE_MATH_DEFINES
 
-#define N 64
+#define N 4096
+#define B 32
+#define BperN 4096/32
 
 #include <string>
 #include <fstream>
@@ -57,7 +59,7 @@ public:
 	}
 };
 
-// Reads Wav info into a Wav class
+// Reads Wav info in to a Wav class
 Wav loadWavFile(char* fname) {
 	FILE* fp = fopen(fname, "rb");
 	Wav wav;
@@ -90,6 +92,7 @@ Wav loadWavFile(char* fname) {
 	return wav;
 }
 
+// Hann function
 float hann(short in, int index, int size) {
 	float value = 2.0f * M_PI * index;
 	value = value / (size - 1.0f);
@@ -106,45 +109,67 @@ int main() {
 	background->Color(0, 1000000, Color(0), Color(0));
 	background->ScaleVector(0, 1000000, Vector2(1.366f, 0.768f), Vector2(1.366f, 0.768f));
 	
+	// Load WAV
 	char* filePath = R"(X:\Music\void\Age quod agis\ageQuodAgisLeftMono.wav)";
 	Wav song = loadWavFile(filePath);
-
 	std::cout << song.header() << std::endl;
 
+	// Set up bars
 	float barWidth = 0.01f;
 	std::vector<Sprite*> bars;
-	for (int i = 0; i < N / 2; ++i) {
+	for (int i = 0; i < B; ++i) {
 		Sprite* bar = new Sprite("blank.png", Vector2(12 * i, 300), Layer::Foreground, Origin::BottomCentre);
 		bar->ScaleVector(0, 0, Vector2(barWidth, 0.01f), Vector2(barWidth, 0.01f));
 		bar->Color(0, 0, Color(255), Color(255));
 		bars.push_back(bar);
 	}
 
+	// Progress at a rate of 100ms
+	// Sample rate: 44100, thus we progress at 4410 samples for each 100ms
 	int progressRate = song.sampleRate / 10;
-	for (int j = progressRate; j < song.size; j += progressRate) {
+	for (int j = progressRate; j < song.size / 4; j += progressRate) {
+		std::cout << "Processing: " << j << std::endl;
+
+		// I chose to grab only 4096 samples because that's a better power of 2 value
+		// Grab 4096 samples and window the values
 		float* input = (float*)malloc(N * sizeof(float));
 		for (int i = 0; i < N; ++i) {
 			input[i] = hann(song.data[i + j - (N / 2)], i, N);
 		}
 		
+		// Setup FFT and apply FFT to input
 		kiss_fft_cpx in[N], out[N];
 		for (int i = 0; i < N; ++i) {
 			in[i].r = input[i];
 			in[i].i = 0.0f;
 		}
-
 		kiss_fft_cfg cfg = kiss_fft_alloc(N, 0, NULL, NULL);
 		kiss_fft(cfg, in, out);
 		free(cfg);
 
-		for (int i = 0; i < N / 2; ++i) {
-			float magnitudeSquared = out[i].r * out[i].r + out[i].i * out[i].i;
-			float dB = 10.0f * log10(magnitudeSquared);
+		// Narrow down out[N] to only 32 bins
+		for (int i = 0; i < B; ++i) {
+			// Find the max within a few indices of out[N]
+			float max = 0.0f;
+			// Because we only want to take into account of the first
+			// half of out[N], we only find the values for BperN/2
+			for (int b = 0; b < BperN/2; ++b) {
+				int outInd = i * BperN/2 + b;
+				float magnitudeSquared = out[outInd].r * out[outInd].r + out[outInd].i * out[outInd].i;
+				if (magnitudeSquared > max) {
+					max = magnitudeSquared;
+				}
+			}
+
+			// Normalize to dB scale
+			float dB = 10.0f * log10(max);
 			int endTime = (j / progressRate) * 100;
-			bars[i]->ScaleVector(bars[i]->endTime, endTime, bars[i]->scaleVector, Vector2(barWidth, (dB / 96.0f) / 8.0f));
+			float endScale = (dB / 96.0f) / 8.0f;
+			bars[i]->ScaleVector(bars[i]->endTime, endTime, bars[i]->scaleVector, Vector2(barWidth, endScale));
 		}
 	}
 
+	// Write to storyboard
 	Storyboard::Instance()->Write(R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\void - Age quod agis (TheWeirdo9).osb)");
 	std::cout << "Finished audio analysis" << std::endl;
 	std::cin.get();
