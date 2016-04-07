@@ -7,7 +7,7 @@
 #include "Helpers.hpp"
 #include <iostream>
 
-// Global variable and helpers can be found in Variable.hpp and Helpers.hpp respectively
+// Global variable and helpers can be found in Variables.hpp and Helpers.hpp respectively
 // I decided to move these out to declutter this Main file. Not sure if this is the 
 // best way to separate my files, but I just wanted to make this file cleaner
 

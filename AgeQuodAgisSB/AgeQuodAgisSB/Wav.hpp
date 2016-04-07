@@ -21,6 +21,7 @@ public:
 	unsigned long size;
 	short* data;
 
+	// Prints out all the Wav info minus the data
 	std::string header();
 };
 

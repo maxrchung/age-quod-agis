@@ -14,7 +14,7 @@ Beatmap* Beatmap::Instance() {
 	return instance;
 }
 
-void Beatmap::ParseHitObjects(std::string& beatmapPath) {
+void Beatmap::ParseHitObjects(const std::string& beatmapPath) {
 	std::ifstream beatmapFile;
 	beatmapFile.open(beatmapPath);
 

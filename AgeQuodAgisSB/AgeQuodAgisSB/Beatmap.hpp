@@ -8,7 +8,7 @@ class Beatmap {
 public:
 	static Beatmap* Instance();
 	std::vector<Note*> notes;
-	void ParseHitObjects(std::string& beatmapPath);
+	void ParseHitObjects(const std::string& beatmapPath);
 private:
 	Beatmap() {};
 	Beatmap(const Beatmap&) {};
