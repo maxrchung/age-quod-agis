@@ -85,11 +85,17 @@
     <ClCompile Include="Hold.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Note.cpp" />
+    <ClCompile Include="Spectrum.cpp" />
+    <ClCompile Include="Wav.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Beatmap.hpp" />
+    <ClInclude Include="Helpers.hpp" />
     <ClInclude Include="Hold.hpp" />
     <ClInclude Include="Note.hpp" />
+    <ClInclude Include="Spectrum.hpp" />
+    <ClInclude Include="Variables.hpp" />
+    <ClInclude Include="Wav.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

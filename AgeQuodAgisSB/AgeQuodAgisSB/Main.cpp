@@ -1,160 +1,23 @@
-#define _USE_MATH_DEFINES
-
 #include "Storyboard.hpp"
 #include "Sprite.hpp"
 #include "Vector2.hpp"
 #include "Beatmap.hpp"
+#include "Spectrum.hpp"
+#include "Variables.hpp"
+#include "Helpers.hpp"
 #include <iostream>
-#include <Windows.h>
-#include <math.h>
-#include <deque>
 
-// Gets the number of snowflakes we can work with by counting the number
-// of snowflake images in a directory
-int getSnowflakeCount(std::string inputDirectory) {
-	WIN32_FIND_DATAA fd;
-	std::string inputDirectorySearch = inputDirectory + "snowflake*.png";
-	HANDLE hFind = FindFirstFileA(inputDirectorySearch.c_str(), &fd);
-	int numSnowflakes = 0;
+// Global variable and helpers can be found in Variable.hpp and Helpers.hpp respectively
+// I decided to move these out to declutter this Main file. Not sure if this is the 
+// best way to separate my files, but I just wanted to make this file cleaner
 
-	do {
-		++numSnowflakes;
-	} while (FindNextFileA(hFind, &fd));
-	FindClose(hFind);
-
-	return numSnowflakes;
-}
-
-// Path setup
-std::string snowflakeBase = R"(Snowflakes\snowflake)";
-std::string beatmapDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\)";
-std::string beatmapTitle = "void - Age quod agis (TheWeirdo9)";
-std::string difficultyName = "[Age quod agis]";
-std::string beatmapPath = beatmapDirectory + beatmapTitle + " " + difficultyName + ".osu";
-std::string storyboardPath = beatmapDirectory + beatmapTitle + ".osb";
-std::string inputDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\Snowflakes\)";
-int snowflakeCount = getSnowflakeCount(inputDirectory);
-int previousSnowflake = 0;
-
-// Randomly picks a new snowflake
-std::string getSnowflake() {
-	int suffix;
-
-	do {
-		suffix = rand() % snowflakeCount + 1;
-	} while (previousSnowflake == suffix);
-	previousSnowflake = suffix;
-
-	return snowflakeBase + std::to_string(suffix);
-}
-
-// Convert degrees to radians
-float dtor(int degrees) {
-	return (degrees * M_PI / 180.0f);
-}
-
-// Colors decrease and increase by a set amount each time a certain lane is pressed
-// Front colors (centerpiece + particles) are lighter, while the background is darker
-int frontValueMin = 100;
-int frontValueMax = 155;
-int frontValue = frontValueMin;
-int frontValueChange = 5;
-bool frontValueIncrease;
-
-Color getFrontColor() {
-	if (frontValue == frontValueMin) {
-		frontValueIncrease = true;
-	}
-	else if (frontValue == frontValueMax) {
-		frontValueIncrease = false;
-	}
-
-	if (frontValueIncrease) {
-		frontValue += frontValueChange;
-	}
-	else {
-		frontValue -= frontValueChange;
-	}
-
-	return Color(frontValue);
-}
-
-int backValueMin = 200;
-int backValueMax = 255;
-int backValue = backValueMax;
-int backValueChange = 5;
-bool backValueIncrease;
-
-Color getBackColor() {
-	if (backValue == backValueMin) {
-		backValueIncrease = true;
-	}
-	else if (backValue == backValueMax) {
-		backValueIncrease = false;
-	}
-
-	if (backValueIncrease) {
-		backValue += backValueChange;
-	}
-	else {
-		backValue -= backValueChange;
-	}
-
-	return Color(backValue);
-}
-
-// BPM
-float bpm = 140.0f;
-float mpb = 1 / bpm;
-float spb = mpb * 60;
-// ~429 ms per beat
-float mspb = 1000 * spb;
-int offset = mspb / 4;
-
-// Overall timing
-int songStart = 1692;
-int songStartOffset = songStart - mspb;
-int songEnd = 358263;
-int songEndOffset = songEnd + mspb;
-
-// Set lanes
-int scaleLane = 1;
-int particleLane = 2;
-int colorLane = 3;
-int rotateLane = 4;
-
-// Particles
-// Deque because we need to remove front particles if there're too many
-std::deque<Sprite*> particles;
-int particleCount = 3;
-float particleDistance = 500;
-float particleBuffer = 40;
-float particleScale = 0.03f;
-float particleOpacity = 0.25f;
-int particleFadeOut = mspb * 10;
-int particleFadeIn = mspb;
-int particleFrequency = 2 * mspb;
-
-// Other
-Vector2 midpoint(320, 240);
-float scaleUp = 1.25f;
-// In degrees
-int rotateAmount = 15;
-float centerpieceScale = 0.15f;
-Sprite* background = new Sprite("blackbg.png", midpoint, Layer::Background);
-Sprite* centerpiece = new Sprite("Snowflakes/centerpiece.png", midpoint);
-
-// Returns the timing of the specified lane from an index
-int getNextLane(int lane, int index) {
-	for (int i = index + 1; i < Beatmap::Instance()->notes.size(); ++i) {
-		if (Beatmap::Instance()->notes[i]->lane == lane) {
-			return Beatmap::Instance()->notes[i]->start - offset;
-		}
-	}
-	return songEndOffset;
-}
+// Beatmap and Spectrum are singletons that control all the notes of the map and the 
+// music spectrum respectively
 
 int main() {
+	// Setup spectrum bars
+	Spectrum::Instance()->Generate(songPath);
+
 	// Background setup
 	background->Color(songStartOffset, songStart, Color(backValue), Color(backValue));
 	background->Fade(songStartOffset, songStart, 0.0f, 1.0f);
@@ -213,7 +76,7 @@ int main() {
 
 					// Choose a random direction and move particle to the end
 					int degrees = rand() % 360;
-					float radians = dtor(degrees);
+					float radians = dToR(degrees);
 
 					// The way the osu! storyboard works is that commands that end later take precedent over
 					// commands that take place earlier. This can be annoying to work with since you run into
@@ -260,9 +123,9 @@ int main() {
 		}
 
 		// Rotation
-		else if (note->lane == rotateLane) {
+		else { // if (note->lane == rotateLane) {
 			int degrees = rotateAmount;
-			float radians = dtor(degrees);
+			float radians = dToR(degrees);
 			centerpiece->Rotate(startOffset, note->end, centerpiece->rotation, centerpiece->rotation + radians);
 
 			for (auto particle : particles) {
