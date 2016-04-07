@@ -16,6 +16,7 @@
 #include "kiss_fft.h"
 #include "Storyboard.hpp"
 #include "Sprite.hpp"
+#include <vector>
 
 // WAV Resources
 // Guide: http://rogerchansdigitalworld.blogspot.com/2010/05/how-to-read-wav-format-file-in-c.html
@@ -104,6 +105,54 @@ float hann(short in, int index, int size) {
 }
 
 int main() {
+	// See http://www.engineeringtoolbox.com/octave-bands-frequency-limits-d_1602.html
+	std::vector<Vector2> freqBands = {
+		//Vector2(11.2f, 14.1f),
+		Vector2(14.1f, 17.8f),
+		Vector2(17.8f, 22.4f),
+		Vector2(22.4f, 28.2f),
+		Vector2(28.2f, 35.5f),
+		Vector2(35.5f, 44.7f),
+		Vector2(44.7f, 56.2f),
+		Vector2(56.2f, 70.8f),
+		Vector2(70.8f, 89.1f),
+		Vector2(89.1f, 112.0f),
+		Vector2(112.0f, 141.0f),
+		Vector2(141.0f, 178.0f),
+		Vector2(178.0f, 224.0f),
+		Vector2(224.0f, 282.0f),
+		Vector2(282.0f, 355.0f),
+		Vector2(355.0f, 447.0f),
+		Vector2(447.0f, 562.0f),
+		Vector2(562.0f, 708.0f),
+		Vector2(708.0f, 891.0f),
+		Vector2(891.0f, 1122.0f),
+		Vector2(1122.0f, 1413.0f),
+		Vector2(1413.0f, 1778.0f),
+		Vector2(1778.0f, 2239.0f),
+		Vector2(2239.0f, 2818.0f),
+		Vector2(2818.0f, 3548.0f),
+		Vector2(3548.0f, 4467.0f),
+		Vector2(4467.0f, 5623.0f),
+		Vector2(5623.0f, 7079.0f),
+		Vector2(7079.0f, 8913.0f),
+		Vector2(8913.0f, 11220.0f),
+		Vector2(11220.0f, 14130.0f),
+		Vector2(14130.0f, 17780.0f),
+		Vector2(17780.0f, 22390.0f)
+	};
+
+	std::vector<Vector2> freqBandIndices;
+	float freqConstant = 44100.0f / N;
+	for (int i = 0; i < 32; ++i) {
+		int startBand = freqBands[i].x;
+		int startIndex = startBand / freqConstant;
+		int endBand = freqBands[i].y;
+		int endIndex = endBand / freqConstant;
+
+		freqBandIndices.push_back(Vector2(startIndex, endIndex));
+	}
+
 	// Background setup
 	Sprite* background = new Sprite("blank.png", Vector2(320, 240), Layer::Background);
 	background->Color(0, 1000000, Color(0), Color(0));
@@ -119,7 +168,7 @@ int main() {
 	std::vector<Sprite*> bars;
 	for (int i = 0; i < B; ++i) {
 		Sprite* bar = new Sprite("blank.png", Vector2(12 * i, 300), Layer::Foreground, Origin::BottomCentre);
-		bar->ScaleVector(0, 0, Vector2(barWidth, 0.01f), Vector2(barWidth, 0.01f));
+		bar->ScaleVector(0, 0, Vector2(barWidth, 0.0f), Vector2(barWidth, 0.0f));
 		bar->Color(0, 0, Color(255), Color(255));
 		bars.push_back(bar);
 	}
@@ -127,14 +176,15 @@ int main() {
 	// Progress at a rate of 100ms
 	// Sample rate: 44100, thus we progress at 4410 samples for each 100ms
 	int progressRate = song.sampleRate / 10;
-	for (int j = progressRate; j < song.size / 4; j += progressRate) {
+	for (int j = progressRate; j < song.size / 2; j += progressRate) {
 		std::cout << "Processing: " << j << std::endl;
 
 		// I chose to grab only 4096 samples because that's a better power of 2 value
 		// Grab 4096 samples and window the values
 		float* input = (float*)malloc(N * sizeof(float));
 		for (int i = 0; i < N; ++i) {
-			input[i] = hann(song.data[i + j - (N / 2)], i, N);
+			float data = song.data[i + j - (N / 2)];
+			input[i] = hann(data, i, N) / 32768.0f;
 		}
 		
 		// Setup FFT and apply FFT to input
@@ -150,21 +200,27 @@ int main() {
 		// Narrow down out[N] to only 32 bins
 		for (int i = 0; i < B; ++i) {
 			// Find the max within a few indices of out[N]
-			float max = 0.0f;
-			// Because we only want to take into account of the first
-			// half of out[N], we only find the values for BperN/2
-			for (int b = 0; b < BperN/2; ++b) {
-				int outInd = i * BperN/2 + b;
-				float magnitudeSquared = out[outInd].r * out[outInd].r + out[outInd].i * out[outInd].i;
-				if (magnitudeSquared > max) {
-					max = magnitudeSquared;
+			float maxMagSquared = 0.0f;
+			for (int b = (int)freqBandIndices[i].x; b <= (int)freqBandIndices[i].y; ++b) {
+				float magnitudeSquared = out[b].r * out[b].r + out[b].i * out[b].i;
+				if (magnitudeSquared > maxMagSquared) {
+					maxMagSquared = magnitudeSquared;
 				}
 			}
 
-			// Normalize to dB scale
-			float dB = 10.0f * log10(max);
+			//float dB = 10.0f * log10f(maxMagSquared);
+			//float dBscale = (dB + 96.33f) / 96.33f;
+			//if (dBscale < 0.0f) {
+			//	dBscale = 0.0f;
+			//}
+			//
+			//float endScale = dBscale * 0.1f;
+			float loggedMax = 10.0f * log10f(maxMagSquared);
+			float endScale = loggedMax * 0.005f;
+			if (endScale < 0.0f) {
+				endScale = 0.0f;
+			}
 			int endTime = (j / progressRate) * 100;
-			float endScale = (dB / 96.0f) / 8.0f;
 			bars[i]->ScaleVector(bars[i]->endTime, endTime, bars[i]->scaleVector, Vector2(barWidth, endScale));
 		}
 	}
