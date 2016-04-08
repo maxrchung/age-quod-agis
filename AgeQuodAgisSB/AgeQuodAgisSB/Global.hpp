@@ -1,5 +1,5 @@
-#ifndef VARIABLES_HPP
-#define VARIABLES_HPP
+#ifndef GLOBAL_HPP
+#define GLOBAL_HPP
 
 #include <string>
 #include <deque>
@@ -53,4 +53,21 @@ extern Sprite* background;
 extern std::string centerpieceFileName;
 extern Sprite* centerpiece;
 
-#endif//VARIABLES_HPP
+extern int frontColorMin;
+extern int frontColorMax;
+extern int backColorMin;
+extern int backColorMax;
+extern int colorDuration;
+
+// Helper functions
+int getSnowflakeCount(std::string inputDirectory);
+
+extern int snowflakeCount;
+extern int previousSnowflake;
+std::string getSnowflake();
+
+float dToR(int degrees);
+
+int getNextLane(int lane, int index);
+
+#endif//GLOBAL_HPP

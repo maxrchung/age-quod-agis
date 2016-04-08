@@ -6,10 +6,9 @@
 #define _USE_MATH_DEFINES
 
 #include "Spectrum.hpp"
-#include "Variables.hpp"
+#include "Global.hpp"
 #include <iostream>
 #include "kiss_fft.h"
-#include "Helpers.hpp"
 
 Spectrum* Spectrum::instance = NULL;
 
@@ -109,7 +108,7 @@ void Spectrum::SetupBars() {
 		bar->Rotate(songStartOffset, songStartOffset, rotationCorrection, rotationCorrection);
 
 		// Coloring, the same as centerpiece and particles
-		bar->Color(songStartOffset, songStartOffset, frontValue, frontValue);
+		bar->Color(songStartOffset, songStartOffset, frontColorMax, frontColorMax);
 
 		bars.push_back(bar);
 	}
