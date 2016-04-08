@@ -57,6 +57,11 @@ int main() {
 				// fade in/out period
 				int particleStart = noteStart - particleFadeIn;
 				int particleEnd = noteStart + particleFadeOut;
+
+				// Applies a fade according to which lane it is in
+				float opacityRange = particleOpacityMax - particleOpacityMin;
+				float opacityScale = note->lane / 4.0f;
+				float particleOpacity = (opacityRange * opacityScale) + particleOpacityMin;
 				particle->Fade(particleStart, noteStart, 0.0f, particleOpacity);
 				particle->Fade(noteStart, particleEnd, particleOpacity, 0.0f);
 

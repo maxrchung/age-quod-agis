@@ -5,7 +5,7 @@
 #include "Beatmap.hpp"
 
 // Set this between 1 to 0 to indicate how much of the map to process
-float debugSize = 0.25f;
+float debugSize = 1.0f;
 
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
@@ -29,7 +29,7 @@ int offset = mspb / 8;
 // Overall timing
 int songStart = 1692;
 int songStartOffset = songStart - mspb;
-int songEnd = 358263;
+int songEnd = 303406;
 int songEndOffset = songEnd + mspb;
 
 // Set lanes
@@ -45,7 +45,8 @@ int particleCount = 1;
 float particleDistance = 500.0f;
 float particleBuffer = 40.0f;
 float particleScale = 0.03f;
-float particleOpacity = 1.0f;
+float particleOpacityMin = 0.1f;
+float particleOpacityMax = 1.0f;
 int particleFadeOut = mspb * 8;
 int particleFadeIn = mspb;
 int particleFrequency = 2 * mspb;
