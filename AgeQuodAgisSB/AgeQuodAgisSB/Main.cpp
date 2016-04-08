@@ -21,7 +21,7 @@ int main() {
 	snowflakeCount = getSnowflakeCount(snowflakeDirectory);
 
 	// Setup spectrum bars
-	// Spectrum::Instance()->Generate(songPath);
+	Spectrum::Instance()->Generate(songPath);
 	
 	// More background setup
 	background->ScaleVector(songStartOffset, songEndOffset, Vector2(1.366f, 0.768f), Vector2(1.366f, 0.768f));
@@ -41,8 +41,6 @@ int main() {
 	// Use index so we can call getNextLane()
 	for (int n = 0; n < Beatmap::Instance()->notes.size() * debugSize; ++n) {
 		Note* note = Beatmap::Instance()->notes[n];
-		int startOffset = note->start - offset;
-		int endOffset = note->end + offset;
 
 		// Particles
 		// Repeatedly make new particles if note is a hold
@@ -80,6 +78,17 @@ int main() {
 		}
 	}
 
+	// Handle scale
+	std::cout << "Handling scale..." << std::endl;
+	for (auto bassKick : Spectrum::Instance()->bassKicks) {
+		int startOffset = bassKick - offset;
+		int endOffset = bassKick + offset;
+		centerpiece->Scale(startOffset, bassKick, centerpieceScale, centerpieceScale * scaleUp);
+		centerpiece->Scale(bassKick, endOffset, centerpieceScale * scaleUp, centerpieceScale);
+
+		// Remember: Can reset endTime
+	}
+
 	// Handle color
 	std::cout << "Handling color..." << std::endl;
 	bool colorSwitch = true;
@@ -89,7 +98,7 @@ int main() {
 	// need it for other things.
 	std::deque<Sprite*> particleCopy = particles;
 	// Use songStart so that you hit peaks on beats
-	for (int i = songStart; i <= songEndOffset / debugSize; i += colorDuration) {
+	for (int i = songStart; i <= songEndOffset * debugSize; i += colorDuration) {
 		// Removes irrelevant particles
 		while (particleCopy.size() > 0 && particleCopy.front()->endTime <= i) {
 			particleCopy.pop_front();

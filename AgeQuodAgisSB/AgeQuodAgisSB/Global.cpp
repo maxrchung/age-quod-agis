@@ -5,7 +5,7 @@
 #include "Beatmap.hpp"
 
 // Set this between 1 to 0 to indicate how much of the map to process
-float debugSize = 1.0f;
+float debugSize = 1.0566f;
 
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
@@ -24,7 +24,7 @@ float mpb = 1 / bpm;
 float spb = mpb * 60;
 // ~429 ms per beat
 float mspb = 1000 * spb;
-int offset = mspb / 8;
+int offset = mspb / 4;
 
 // Overall timing
 int songStart = 1692;
@@ -54,7 +54,7 @@ int particleRotateAmount = 10;
 
 // Other
 Vector2 midpoint(320, 240);
-float scaleUp = 1.1f;
+float scaleUp = 1.15f;
 // In degrees
 int rotateAmount = 30;
 float centerpieceScale = 0.15f;

@@ -19,6 +19,8 @@ public:
 	std::vector<Sprite*> bars;
 	float barBuffer = 75.0f;
 	float barScaleUp = 1.15f;
+	// Time for each bass kick
+	std::vector<int> bassKicks;
 private:
 	Spectrum() {};
 	Spectrum(const Spectrum&) {};
@@ -41,12 +43,18 @@ private:
 	std::vector<float> freqBands;
 	// Actual indices corresponding to the WINSIZE
 	std::vector<float> freqBandIndices;
+	// Which frequency band should we base bass off of
+	int bassBandIndex = 4;
+	// Threshold for when to bass kick or not
+	float bassThreshold = 43.0f;
+	// So we only count it once per up tick
+	float bassTrigger = false;
 
 	std::string barFileName = "blank.png";
 	float barMinWidth = 0.008f;
 	float barMinHeight = 0.005f;
 	float barScaleFactor = 0.0015f;
-	float barGradientMax = 0.5f;
+	float barGradientMax = 1.0f;
 	float barGradientMin = 0.1f;
 	// How fast do you want to take snapshots, in milliseconds
 	float snapshotRate = 100.0f;
