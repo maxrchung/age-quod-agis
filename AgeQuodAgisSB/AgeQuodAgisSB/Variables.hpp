@@ -5,55 +5,49 @@
 #include <deque>
 #include "Sprite.hpp"
 
-// Path setup
-std::string snowflakeBase = R"(Snowflakes\snowflake)";
-std::string beatmapDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\)";
-std::string beatmapTitle = "void - Age quod agis (TheWeirdo9)";
-std::string difficultyName = "[Age quod agis]";
-std::string beatmapPath = beatmapDirectory + beatmapTitle + " " + difficultyName + ".osu";
-std::string storyboardPath = beatmapDirectory + beatmapTitle + ".osb";
-// Due to how I analyze the music, the song must be mono/single channel
-std::string songPath = R"(X:\Music\void\Age quod agis\ageQuodAgisLeftMono.wav)";
+extern std::string snowflakeBase;
+extern std::string beatmapDirectory;
+extern std::string beatmapTitle;
+extern std::string difficultyName;
+extern std::string beatmapPath;
+extern std::string storyboardPath;
+extern std::string songPath;
+extern std::string snowflakeDirectory;
 
-// BPM
-float bpm = 140.0f;
-float mpb = 1 / bpm;
-float spb = mpb * 60;
-// ~429 ms per beat
-float mspb = 1000 * spb;
-int offset = mspb / 4;
+extern float bpm;
+extern float mpb;
+extern float spb;
+extern float mspb;
+extern int offset;
 
-// Overall timing
-int songStart = 1692;
-int songStartOffset = songStart - mspb;
-int songEnd = 358263;
-int songEndOffset = songEnd + mspb;
+extern int songStart;
+extern int songStartOffset;
+extern int songEnd;
+extern int songEndOffset;
 
-// Set lanes
-int scaleLane = 1;
-int particleLane = 2;
-int colorLane = 3;
-int rotateLane = 4;
+extern int scaleLane;
+extern int particleLane;
+extern int colorLane;
+extern int rotateLane;
 
-// Particles
-// Deque because we need to remove front particles if there're too many
-std::deque<Sprite*> particles;
-int particleCount = 3;
-float particleDistance = 500;
-float particleBuffer = 40;
-float particleScale = 0.03f;
-float particleOpacity = 0.25f;
-int particleFadeOut = mspb * 10;
-int particleFadeIn = mspb;
-int particleFrequency = 2 * mspb;
+extern std::deque<Sprite*> particles;
+extern int particleCount;
+extern float particleDistance;
+extern float particleBuffer;
+extern float particleScale;
+extern float particleOpacity;
+extern int particleFadeOut;
+extern int particleFadeIn;
+extern int particleFrequency;
 
-// Other
-Vector2 midpoint(320, 240);
-float scaleUp = 1.25f;
-// In degrees
-int rotateAmount = 15;
-float centerpieceScale = 0.15f;
-Sprite* background = new Sprite("blackbg.png", midpoint, Layer::Background);
-Sprite* centerpiece = new Sprite("Snowflakes/centerpiece.png", midpoint);
+extern Vector2 midpoint;
+extern float scaleUp;
+extern int rotateAmount;
+extern float centerpieceScale;
+extern std::string backgroundFileName;
+extern Sprite* background;
+ 
+extern std::string centerpieceFileName;
+extern Sprite* centerpiece;
 
 #endif//VARIABLES_HPP

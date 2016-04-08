@@ -33,6 +33,15 @@
     <ClCompile Include="Spectrum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kiss_fft.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Beatmap.hpp">
@@ -54,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kiss_fft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_kiss_fft_guts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,99 +8,28 @@
 #include "Beatmap.hpp"
 #include <math.h>
 
-// Gets the number of snowflakes we can work with by counting the number
-// of snowflake images in a directory
-int getSnowflakeCount(std::string inputDirectory) {
-	WIN32_FIND_DATAA fd;
-	std::string inputDirectorySearch = inputDirectory + "snowflake*.png";
-	HANDLE hFind = FindFirstFileA(inputDirectorySearch.c_str(), &fd);
-	int numSnowflakes = 0;
+int getSnowflakeCount(std::string inputDirectory);
 
-	do {
-		++numSnowflakes;
-	} while (FindNextFileA(hFind, &fd));
-	FindClose(hFind);
+extern int snowflakeCount;
+extern int previousSnowflake;
+std::string getSnowflake();
 
-	return numSnowflakes;
-}
+float dToR(int degrees);
 
-// Randomly picks a new snowflake
-std::string snowflakeDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\Snowflakes\)";
-int snowflakeCount = getSnowflakeCount(snowflakeDirectory);
-// Previous snowflake is tracked so we don't repick it
-int previousSnowflake = 0;
-std::string getSnowflake() {
-	int suffix;
+extern int frontValueMin;
+extern int frontValueMax;
+extern int frontValue;
+extern int frontValueChange;
+extern bool frontValueIncrease;
+Color getFrontColor();
 
-	do {
-		suffix = rand() % snowflakeCount + 1;
-	} while (previousSnowflake == suffix);
-	previousSnowflake = suffix;
+extern int backValueMin;
+extern int backValueMax;
+extern int backValue;
+extern int backValueChange;
+extern bool backValueIncrease;
+Color getBackColor();
 
-	return snowflakeBase + std::to_string(suffix);
-}
-
-// Convert degrees to radians
-float dToR(int degrees) {
-	return degrees * M_PI / 180.0f;
-}
-
-// Colors decrease and increase by a set amount each time a certain lane is pressed
-// Front colors (centerpiece + particles) are lighter, while the background is darker
-int frontValueMin = 100;
-int frontValueMax = 155;
-int frontValue = frontValueMin;
-int frontValueChange = 5;
-bool frontValueIncrease;
-Color getFrontColor() {
-	if (frontValue == frontValueMin) {
-		frontValueIncrease = true;
-	}
-	else if (frontValue == frontValueMax) {
-		frontValueIncrease = false;
-	}
-
-	if (frontValueIncrease) {
-		frontValue += frontValueChange;
-	}
-	else {
-		frontValue -= frontValueChange;
-	}
-
-	return Color(frontValue);
-}
-
-int backValueMin = 200;
-int backValueMax = 255;
-int backValue = backValueMax;
-int backValueChange = 5;
-bool backValueIncrease;
-Color getBackColor() {
-	if (backValue == backValueMin) {
-		backValueIncrease = true;
-	}
-	else if (backValue == backValueMax) {
-		backValueIncrease = false;
-	}
-
-	if (backValueIncrease) {
-		backValue += backValueChange;
-	}
-	else {
-		backValue -= backValueChange;
-	}
-
-	return Color(backValue);
-}
-
-// Returns the timing of the specified lane from an index
-int getNextLane(int lane, int index) {
-	for (int i = index + 1; i < Beatmap::Instance()->notes.size(); ++i) {
-		if (Beatmap::Instance()->notes[i]->lane == lane) {
-			return Beatmap::Instance()->notes[i]->start - offset;
-		}
-	}
-	return songEndOffset;
-}
+int getNextLane(int lane, int index);
 
 #endif//HELPERS_HPP

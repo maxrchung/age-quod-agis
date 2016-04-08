@@ -5,7 +5,7 @@
 // with a variable, even if I specify it as const. This is used to evaluate 
 // how many samples you should take at a time for each window, and this is 
 // also the size of the FFT arrays
-#define WINSIZE 4096
+#define WINSIZE 8192
 
 #include <string>
 #include "Sprite.hpp"
@@ -26,8 +26,11 @@ private:
 	Wav LoadWavFile(const char* fname);
 	float Hann(short in, int index, int size);
 	void CalculateFrequencyBands();
+	void SetupBars();
+	void TakeSnapshots();
 
 	Wav song;
+
 	// Power to measure frequencies by
 	float freqPower = powf(2.0f, 0.25f);
 	// Target frequencies we want to shoot for
@@ -36,6 +39,15 @@ private:
 	std::vector<float> freqBands;
 	// Actual indices corresponding to the WINSIZE
 	std::vector<float> freqBandIndices;
+
+	std::string barFileName = "blank.png";
+	float barMinWidth = 0.01f;
+	float barMinHeight = 0.005f;
+	float barScaleFactor = 0.002f;
+	float barGradient = 0.25f;
+	float barBuffer = 75.0f;
+	// How fast do you want to take snapshots, in milliseconds
+	float snapshotRate = 100.0f;
 
 };
 

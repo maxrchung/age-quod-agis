@@ -1,3 +1,7 @@
+// This is my test project to get audio processing working. A lot of things are left
+// undocumented and rough. For cleaner and more usable code, see Spectrum.cpp 
+// in the AgeQuodAgisSB project
+
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #endif
