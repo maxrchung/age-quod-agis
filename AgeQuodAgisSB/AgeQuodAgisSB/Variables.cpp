@@ -1,5 +1,8 @@
 #include "Variables.hpp"
 
+// Set this between 1 to 0 to indicate how much of the map to process
+float debugSize = 1.0f;
+
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
 std::string beatmapDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\)";
@@ -17,7 +20,7 @@ float mpb = 1 / bpm;
 float spb = mpb * 60;
 // ~429 ms per beat
 float mspb = 1000 * spb;
-int offset = mspb / 4;
+int offset = mspb / 8;
 
 // Overall timing
 int songStart = 1692;
@@ -34,7 +37,7 @@ int rotateLane = 4;
 // Particles
 // Deque because we need to remove front particles if there're too many
 std::deque<Sprite*> particles;
-int particleCount = 3;
+int particleCount = 5;
 float particleDistance = 500.0f;
 float particleBuffer = 40.0f;
 float particleScale = 0.03f;
@@ -42,12 +45,13 @@ float particleOpacity = 0.25f;
 int particleFadeOut = mspb * 10;
 int particleFadeIn = mspb;
 int particleFrequency = 2 * mspb;
+int particleRotateAmount = 10;
 
 // Other
 Vector2 midpoint(320, 240);
-float scaleUp = 1.25f;
+float scaleUp = 1.1f;
 // In degrees
-int rotateAmount = 15;
+int rotateAmount = 30;
 float centerpieceScale = 0.15f;
 
 std::string backgroundFileName = "blank.png";

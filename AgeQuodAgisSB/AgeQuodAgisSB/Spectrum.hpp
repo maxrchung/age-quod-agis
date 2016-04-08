@@ -17,6 +17,8 @@ public:
 	static Spectrum* Instance();
 	void Generate(const std::string& songPath);
 	std::vector<Sprite*> bars;
+	float barBuffer = 75.0f;
+	float barScaleUp = 1.15f;
 private:
 	Spectrum() {};
 	Spectrum(const Spectrum&) {};
@@ -34,18 +36,18 @@ private:
 	// Power to measure frequencies by
 	float freqPower = powf(2.0f, 0.25f);
 	// Target frequencies we want to shoot for
-	float freqBandStart = 20.0f;
-	float freqBandEnd = 20000.0f;
+	float freqBandStart = 50.0f;
+	float freqBandEnd = 18000.0f;
 	std::vector<float> freqBands;
 	// Actual indices corresponding to the WINSIZE
 	std::vector<float> freqBandIndices;
 
 	std::string barFileName = "blank.png";
-	float barMinWidth = 0.01f;
+	float barMinWidth = 0.008f;
 	float barMinHeight = 0.005f;
-	float barScaleFactor = 0.002f;
-	float barGradient = 0.25f;
-	float barBuffer = 75.0f;
+	float barScaleFactor = 0.0015f;
+	float barGradientMax = 0.5f;
+	float barGradientMin = 0.1f;
 	// How fast do you want to take snapshots, in milliseconds
 	float snapshotRate = 100.0f;
 

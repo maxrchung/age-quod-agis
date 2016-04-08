@@ -5,6 +5,8 @@
 #include <deque>
 #include "Sprite.hpp"
 
+extern float debugSize;
+
 extern std::string snowflakeBase;
 extern std::string beatmapDirectory;
 extern std::string beatmapTitle;
@@ -39,6 +41,7 @@ extern float particleOpacity;
 extern int particleFadeOut;
 extern int particleFadeIn;
 extern int particleFrequency;
+extern int particleRotateAmount;
 
 extern Vector2 midpoint;
 extern float scaleUp;

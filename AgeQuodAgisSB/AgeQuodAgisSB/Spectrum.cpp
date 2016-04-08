@@ -80,7 +80,7 @@ void Spectrum::CalculateFrequencyBands() {
 
 void Spectrum::SetupBars() {
 	for (int i = 0; i < freqBands.size(); ++i) {
-		Sprite* bar = new Sprite(barFileName, Vector2(12 * i, 300), Layer::Foreground, Origin::BottomCentre);
+		Sprite* bar = new Sprite(barFileName, midpoint, Layer::Foreground, Origin::BottomCentre);
 		bar->ScaleVector(songStartOffset, songStartOffset, Vector2(barMinWidth, barMinHeight), Vector2(barMinWidth, barMinHeight));
 
 		// Fades the bars like a gradient. The most satured colors are on the side
@@ -89,8 +89,8 @@ void Spectrum::SetupBars() {
 		// with size()'s unsigned int results
 		float slide = i - (int)freqBands.size() / 2;
 		float slideNormalized = slide / ((int)freqBands.size() / 2);
-		float opaqueness = 1.0f - barGradient;
-		float opacity = fabs(slideNormalized * opaqueness) + barGradient;
+		float opaqueness = barGradientMax - barGradientMin;
+		float opacity = fabs(slideNormalized * opaqueness) + barGradientMin;
 		bar->Fade(songStartOffset, songStart, 0.0f, opacity);
 		bar->Fade(songEnd, songEndOffset, opacity, 0.0f);
 
@@ -140,7 +140,7 @@ void Spectrum::TakeSnapshots() {
 	// Find start and end points we take samples from
 	int startProgress = songStartOffset / 1000.0f * song.sampleRate;
 	int endProgress = songEndOffset / 1000.0f * song.sampleRate;
-	for(float p = startProgress; p < endProgress / 8; p += progressRate) {
+	for(float p = startProgress; p < endProgress * debugSize; p += progressRate) {
 		std::cout << "Processing sample at: " << p << std::endl;
 
 		// To make future index calculations easier
