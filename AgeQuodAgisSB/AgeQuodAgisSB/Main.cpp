@@ -22,7 +22,7 @@ int main() {
 	snowflakeCount = getSnowflakeCount(snowflakeDirectory);
 
 	// Setup spectrum bars
-	// Spectrum::Instance()->Generate(songPath);
+	Spectrum::Instance()->Generate(songPath);
 	
 	// Background setup
 	background->ScaleVector(songStartOffset, songEndOffset, backgroundScale, backgroundScale);
@@ -100,13 +100,29 @@ int main() {
 		}
 		int timeDiff = endTime - rotationTimings[i].start;
 
-		// power * rotationRate / rotationPeriod = overallRotation / timeDiff
-		float overallRotation = rotationTimings[i].power * rotationRate * timeDiff / rotationPeriod;
-		float endRotation = centerpiece->rotation + overallRotation;
-		centerpiece->Rotate(rotationTimings[i].start, endTime, centerpiece->rotation, endRotation);
+		// power * rotationFreq / rotationPeriod = overallRotation / timeDiff
+		float overallRotation = rotationTimings[i].power * rotationFreq * timeDiff / rotationPeriod;
+		centerpiece->Rotate(rotationTimings[i].start, endTime, centerpiece->rotation, centerpiece->rotation+ overallRotation);
 
+		// Need to discretely move bars so they can smoothly move around in a circle
+		int discretePeriod = rotationPeriod / rotationDiscretes;
+		float discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
 		for (auto bar : Spectrum::Instance()->bars) {
+			for (float j = discretePeriod; j < timeDiff; j += discretePeriod) {
+				float startMoveTime = rotationTimings[i].start + j - discretePeriod;
+				float endMoveTime = startMoveTime + discretePeriod;
 
+				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
+
+				// Need to discretely move around the centerpiece
+				float rotationCorrection = bar->rotation - M_PI / 2;
+				Vector2 barPos = bar->position;
+				float rotatedPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer + midpoint.x;
+				float rotatedPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer + midpoint.y;
+				Vector2 rotatedPos(rotatedPosX, rotatedPosY);
+
+				bar->Move(startMoveTime, endMoveTime, bar->position, rotatedPos);
+			}
 		}
 	}
 
@@ -144,14 +160,14 @@ int main() {
 				//bar->Scale(startOffset, i, 1.0f, Spectrum::Instance()->barScaleUp);
 				//bar->Scale(i, endOffset, Spectrum::Instance()->barScaleUp, 1.0f);
 
-				Vector2 barPos = bar->position;
-				float rotationCorrection = bar->rotation - M_PI / 2;
-				float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
-				float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
-				Vector2 scaledPos(scaledPosX, scaledPosY);
+				//Vector2 barPos = bar->position;
+				//float rotationCorrection = bar->rotation - M_PI / 2;
+				//float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
+				//float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
+				//Vector2 scaledPos(scaledPosX, scaledPosY);
 
-				bar->Move(startOffset, i, barPos, scaledPos);
-				bar->Move(i, endOffset, scaledPos, barPos);
+				//bar->Move(startOffset, i, barPos, scaledPos);
+				//bar->Move(i, endOffset, scaledPos, barPos);
 			}
 
 			for (auto particle : particleCopy) {

@@ -75,8 +75,9 @@ extern std::vector<Range> scaleOffRanges;
 extern std::string scaleOffRangesPath;
 std::vector<Range> readScaleOffRanges(std::string filePath);
 
-extern float rotationRate;
+extern float rotationFreq;
 extern float rotationPeriod;
+extern float rotationDiscretes;
 extern std::vector<RotationTiming> rotationTimings;
 extern std::string rotationTimingsPath;
 std::vector<RotationTiming> readRotationTimings(std::string filePath);

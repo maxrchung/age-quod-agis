@@ -6,7 +6,7 @@
 #include <fstream>
 
 // Set this between 1 to 0 to indicate how much of the map to process
-float debugSize = 1.0f;
+float debugSize = 0.25f;
 
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
@@ -146,8 +146,9 @@ std::vector<Range> readScaleOffRanges(std::string filePath) {
 }
 
 // Base amount to spin
-float rotationRate = 2 * M_PI;
+float rotationFreq = 2 * M_PI;
 float rotationPeriod = mspb * 20;
+float rotationDiscretes = 40;
 // Read in times for when rotation should change in the map
 std::vector<RotationTiming> rotationTimings;
 std::string rotationTimingsPath = R"(C:\Users\Wax Chug da Gwad\Desktop\age-quod-agis\AgeQuodAgisSB\AgeQuodAgisSB\RotationMap.txt)";
