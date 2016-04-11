@@ -3,9 +3,10 @@
 #include "Global.hpp"
 #include <Windows.h>
 #include "Beatmap.hpp"
+#include <fstream>
 
 // Set this between 1 to 0 to indicate how much of the map to process
-float debugSize = 1.0566f;
+float debugSize = 1.0f;
 
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
@@ -32,12 +33,6 @@ int songStartOffset = songStart - mspb;
 int songEnd = 303406;
 int songEndOffset = songEnd + mspb;
 
-// Set lanes
-int scaleLane = 1;
-int particleLane = 2;
-int colorLane = 3;
-int rotateLane = 4;
-
 // Particles
 // Deque because we need to remove front particles if there're too many
 std::deque<Sprite*> particles;
@@ -54,7 +49,8 @@ int particleRotateAmount = 10;
 
 // Other
 Vector2 midpoint(320, 240);
-float scaleUp = 1.15f;
+float scaleUp = 1.2f;
+float scaleOffset = mspb;
 // In degrees
 int rotateAmount = 30;
 float centerpieceScale = 0.15f;
@@ -62,6 +58,7 @@ float centerpieceScale = 0.15f;
 // Setup background
 std::string backgroundFileName = "blank.png";
 Sprite* background = new Sprite(backgroundFileName, midpoint, Layer::Background);
+Vector2 backgroundScale(1.366f, 0.768f);
 
 // Setup centerpiece
 std::string centerpieceFileName = "Snowflakes/centerpiece.png";
@@ -120,4 +117,59 @@ int getNextLane(int lane, int index) {
 		}
 	}
 	return songEndOffset;
+}
+
+// Don't scale in these sections
+std::vector<Range> scaleOffRanges;
+std::string scaleOffRangesPath = R"(C:\Users\Wax Chug da Gwad\Desktop\age-quod-agis\AgeQuodAgisSB\AgeQuodAgisSB\ScaleOffRanges.txt)";
+std::vector<Range> readScaleOffRanges(std::string filePath) {
+	std::vector<Range> ranges;
+	std::ifstream scaleFile(filePath);
+
+	// Get number of lines...
+	int lines = 0;
+	while (std::getline(scaleFile, std::string())) {
+		++lines;
+	}
+
+	scaleFile = std::ifstream(filePath);
+	for (int i = 0; i < lines; ++i) {
+		int startTime;
+		int endTime;
+
+		scaleFile >> startTime;
+		scaleFile >> endTime;
+		ranges.push_back(Range(startTime, endTime));
+	}
+
+	return ranges;
+}
+
+// Base amount to spin
+float rotationRate = 2 * M_PI;
+float rotationPeriod = mspb * 20;
+// Read in times for when rotation should change in the map
+std::vector<RotationTiming> rotationTimings;
+std::string rotationTimingsPath = R"(C:\Users\Wax Chug da Gwad\Desktop\age-quod-agis\AgeQuodAgisSB\AgeQuodAgisSB\RotationMap.txt)";
+std::vector<RotationTiming> readRotationTimings(std::string filePath) {
+	std::vector<RotationTiming> timings;
+	std::ifstream scaleFile(filePath);
+
+	// Get number of lines...
+	int lines = 0;
+	while (std::getline(scaleFile, std::string())) {
+		++lines;
+	}
+
+	scaleFile = std::ifstream(filePath);
+	for (int i = 0; i < lines; ++i) {
+		int start;
+		float power;
+
+		scaleFile >> start;
+		scaleFile >> power;
+		timings.push_back(RotationTiming(start, power));
+	}
+
+	return timings;
 }

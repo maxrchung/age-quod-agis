@@ -6,7 +6,6 @@
 #define _USE_MATH_DEFINES
 
 #include "Spectrum.hpp"
-#include "Global.hpp"
 #include <iostream>
 #include "kiss_fft.h"
 
@@ -200,21 +199,12 @@ void Spectrum::TakeSnapshots() {
 			// Scale the magnitude to a more reasonable log/dB scale
 			float loggedMax = 10.0f * log10f(maxMagSquared);
 
-			if (j == bassBandIndex) {
-				if (loggedMax >= bassThreshold && !bassTrigger) {
-					bassKicks.push_back((p / progressRate) * snapshotRate);
-					bassTrigger = true;
-				}
-				else {
-					bassTrigger = false;
-				}
-			}
-
 			float endScale = loggedMax * barScaleFactor;
 			// log10 can return from negative infinity to 0, so this clamps negative values
 			if (endScale < barMinHeight) {
 				endScale = barMinHeight;
 			}
+
 			int endTime = (p / progressRate) * snapshotRate;
 			int startTime = ((p - progressRate) / progressRate) * snapshotRate;
 			// I may have to rethink Sprite.endTime in the future because a lot of other variables can increase it.

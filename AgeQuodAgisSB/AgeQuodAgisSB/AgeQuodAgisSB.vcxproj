@@ -86,6 +86,8 @@
     <ClCompile Include="kiss_fft.c" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Note.cpp" />
+    <ClCompile Include="Range.cpp" />
+    <ClCompile Include="RotationTiming.cpp" />
     <ClCompile Include="Spectrum.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Wav.cpp" />
@@ -95,6 +97,8 @@
     <ClInclude Include="Hold.hpp" />
     <ClInclude Include="kiss_fft.h" />
     <ClInclude Include="Note.hpp" />
+    <ClInclude Include="Range.hpp" />
+    <ClInclude Include="RotationTiming.hpp" />
     <ClInclude Include="Spectrum.hpp" />
     <ClInclude Include="Global.hpp" />
     <ClInclude Include="Wav.hpp" />

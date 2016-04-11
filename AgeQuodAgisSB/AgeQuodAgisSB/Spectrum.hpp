@@ -11,6 +11,7 @@
 #include "Sprite.hpp"
 #include <vector>
 #include "Wav.hpp"
+#include "Global.hpp"
 
 class Spectrum {
 public:
@@ -18,9 +19,7 @@ public:
 	void Generate(const std::string& songPath);
 	std::vector<Sprite*> bars;
 	float barBuffer = 75.0f;
-	float barScaleUp = 1.15f;
-	// Time for each bass kick
-	std::vector<int> bassKicks;
+	float barScaleUp = 1.1f;
 private:
 	Spectrum() {};
 	Spectrum(const Spectrum&) {};
@@ -43,12 +42,6 @@ private:
 	std::vector<float> freqBands;
 	// Actual indices corresponding to the WINSIZE
 	std::vector<float> freqBandIndices;
-	// Which frequency band should we base bass off of
-	int bassBandIndex = 4;
-	// Threshold for when to bass kick or not
-	float bassThreshold = 43.0f;
-	// So we only count it once per up tick
-	float bassTrigger = false;
 
 	std::string barFileName = "blank.png";
 	float barMinWidth = 0.008f;

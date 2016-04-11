@@ -1,6 +1,8 @@
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
+#include "RotationTiming.hpp"
+#include "Range.hpp"
 #include <string>
 #include <deque>
 #include "Sprite.hpp"
@@ -27,11 +29,6 @@ extern int songStartOffset;
 extern int songEnd;
 extern int songEndOffset;
 
-extern int scaleLane;
-extern int particleLane;
-extern int colorLane;
-extern int rotateLane;
-
 extern std::deque<Sprite*> particles;
 extern int particleCount;
 extern float particleDistance;
@@ -46,13 +43,16 @@ extern int particleRotateAmount;
 
 extern Vector2 midpoint;
 extern float scaleUp;
+extern float scaleOffset;
 extern int rotateAmount;
-extern float centerpieceScale;
+
 extern std::string backgroundFileName;
 extern Sprite* background;
- 
+extern Vector2 backgroundScale;
+
 extern std::string centerpieceFileName;
 extern Sprite* centerpiece;
+extern float centerpieceScale;
 
 extern int frontColorMin;
 extern int frontColorMax;
@@ -70,5 +70,15 @@ std::string getSnowflake();
 float dToR(int degrees);
 
 int getNextLane(int lane, int index);
+
+extern std::vector<Range> scaleOffRanges;
+extern std::string scaleOffRangesPath;
+std::vector<Range> readScaleOffRanges(std::string filePath);
+
+extern float rotationRate;
+extern float rotationPeriod;
+extern std::vector<RotationTiming> rotationTimings;
+extern std::string rotationTimingsPath;
+std::vector<RotationTiming> readRotationTimings(std::string filePath);
 
 #endif//GLOBAL_HPP
