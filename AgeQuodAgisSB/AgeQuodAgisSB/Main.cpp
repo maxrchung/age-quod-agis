@@ -131,18 +131,18 @@ int main() {
 			//}
 		}
 	}
-	// Handle the first bar scaling
-	// Rotation will handle all the rest of the scaling below since the movement is correlated with both rotation and scaling
 
-	for (auto bar : Spectrum::Instance()->bars) {
-		Vector2 barPos = bar->position;
-		float rotationCorrection = bar->rotation - M_PI / 2;
-		float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
-		float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
-		Vector2 scaledPos(scaledPosX, scaledPosY);
+	//// Handle the first bar scaling
+	//// The rotation section will handle all the rest of the scaling below
+	//for (auto bar : Spectrum::Instance()->bars) {
+	//	Vector2 barPos = bar->position;
+	//	float rotationCorrection = bar->rotation - M_PI / 2;
+	//	float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
+	//	float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
+	//	Vector2 scaledPos(scaledPosX, scaledPosY);
 
-		bar->Move(songStartOffset, songStart, barPos, scaledPos);
-	}
+	//	bar->Move(songStartOffset, songStart, barPos, scaledPos);
+	//}
 
 	// Handle rotation
 	std::cout << "Handling rotations..." << std::endl;
@@ -169,14 +169,20 @@ int main() {
 			// to using such the updating counter below to find when to scale the bars appropriately
 			int scaleCounter = 0;
 			int j;
-			for (j = rotationTimings[i].start; j < endTime; j += discretePeriod) {
-				float startMoveTime = j;
+			// This is kind of my awkward solution to solving some edge case issues
+			bool endLoop = false;
+			for (j = rotationTimings[i].start; ; j += discretePeriod) {
+				if (j >= endTime - discretePeriod) {
+					endLoop = true;
+				}
+
+				float startMoveTime = j - discretePeriod;
 				float endMoveTime = startMoveTime + discretePeriod;
 
 				// Because timeDiff may not divide evenly into discretePeriod,
 				// we need to account for the last iteration individually
-				if (endTime - j <= discretePeriod) {
-					endMoveTime = endTime;
+				if (endLoop) {
+					endMoveTime = endTime - discretePeriod;
 					discretePeriod = endTime - j;
 					discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
 				}
@@ -184,19 +190,17 @@ int main() {
 				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
 
 				float barScale = 1.0f;
-				scaleCounter += discretePeriod;
 				if (scaleCounter % (int)scaleOffset == 0) {
 					barScale = Spectrum::Instance()->barScaleUp;
 				}
-				else {
-					// Don't scale if in the scale off regions
-					for (auto range : scaleOffRanges) {
-						if (j > range.begin && j < range.end) {
-							barScale = 1.0f;
-							break;
-						}
+				// Don't scale if in the scale off regions
+				for (auto range : scaleOffRanges) {
+					if (j > range.begin && j < range.end) {
+						barScale = 1.0f;
+						break;
 					}
 				}
+				scaleCounter += discretePeriod;
 
 				// Discretely move around the centerpiece
 				float rotationCorrection = bar->rotation - M_PI / 2;
@@ -205,6 +209,10 @@ int main() {
 				float rotatedPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * barScale + midpoint.y;
 				Vector2 rotatedPos(rotatedPosX, rotatedPosY);
 				bar->Move(startMoveTime, endMoveTime, bar->position, rotatedPos);
+
+				if (endLoop) {
+					break;
+				}
 			}
 		}
 	}
