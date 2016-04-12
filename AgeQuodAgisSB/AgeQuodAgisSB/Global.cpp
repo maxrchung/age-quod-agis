@@ -42,7 +42,7 @@ std::deque<Sprite*> particles;
 int particleCount = 1;
 float particleDistance = 500.0f;
 float particleBuffer = 40.0f;
-float particleScale = 0.03f;
+float particleScale = 0.3f;
 float particleOpacityMin = 0.2f;
 float particleOpacityMax = 0.6f;
 int particleFadeOut = mspb * 8;
@@ -56,7 +56,7 @@ int particleDiscretes = 10;
 Vector2 midpoint(320, 240);
 float scaleUp = 1.15f;
 float scaleOffset = mspb;
-float centerpieceScale = 0.15f;
+float centerpieceScale = 0.3f;
 
 // Setup background
 std::string backgroundFileName = "blank.png";
