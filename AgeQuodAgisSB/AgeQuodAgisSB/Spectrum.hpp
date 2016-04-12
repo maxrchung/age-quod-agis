@@ -35,7 +35,7 @@ private:
 	Wav song;
 
 	// Power to measure frequencies by
-	float freqPower = powf(2.0f, 0.25f);
+	float freqPower = powf(2.0f, 0.35f);
 	// Target frequencies we want to shoot for
 	float freqBandStart = 50.0f;
 	float freqBandEnd = 18000.0f;
@@ -44,7 +44,7 @@ private:
 	std::vector<float> freqBandIndices;
 
 	std::string barFileName = "blank.png";
-	float barMinWidth = 0.008f;
+	float barMinWidth = 0.01f;
 	float barMinHeight = 0.005f;
 	float barScaleFactor = 0.0015f;
 	float barGradientMax = 1.0f;

@@ -50,7 +50,7 @@ int particleFadeIn = mspb;
 int particleFrequency = 2 * mspb;
 int particleRotateAmount = -270;
 // How many times to divide for particle rotation
-int particleDiscretes = 20;
+int particleDiscretes = 10;
 
 // Other
 Vector2 midpoint(320, 240);

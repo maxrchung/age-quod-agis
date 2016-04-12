@@ -98,7 +98,7 @@ int main() {
 				}
 
 				// Break up into discrete chunks to have a smooth rotation
-				float discretePeriod = (particleEnd - particleStart) / (float) particleDiscretes;
+				float discretePeriod = (particleEnd - particleStart) / (float)particleDiscretes;
 				float discreteRotation = dToR(particleRotateAmount) * rotationPower / particleDiscretes;
 				float discreteDistance = particleDistance / particleDiscretes;
 				for (float k = particleStart; k < particleEnd; k += discretePeriod) {
@@ -190,6 +190,8 @@ int main() {
 			// Trying to perform fmod on j below led to some problems, so using this counter was
 			// my solution to properly scaling the bars
 			int scaleCounter = 0;
+			// This looks wrong obviously, but because I need to keep the discretePeriod the same,
+			// we have to keep the scaleDivisor at the same rate
 			int scaleDivisor = scaleOffset / offset;
 
 			// This is kind of my awkward solution to solving some edge case issues
