@@ -8,6 +8,7 @@
 #include "Sprite.hpp"
 
 extern float debugSize;
+extern bool debugSpectrum;
 
 extern std::string snowflakeBase;
 extern std::string beatmapDirectory;
@@ -40,11 +41,11 @@ extern int particleFadeOut;
 extern int particleFadeIn;
 extern int particleFrequency;
 extern int particleRotateAmount;
+extern int particleDiscretes;
 
 extern Vector2 midpoint;
 extern float scaleUp;
 extern float scaleOffset;
-extern int rotateAmount;
 
 extern std::string backgroundFileName;
 extern Sprite* background;

@@ -22,7 +22,9 @@ int main() {
 	snowflakeCount = getSnowflakeCount(snowflakeDirectory);
 
 	// Setup spectrum bars
-	Spectrum::Instance()->Generate(songPath);
+	if (debugSpectrum) {
+		Spectrum::Instance()->Generate(songPath);
+	}
 	
 	// Background setup
 	background->ScaleVector(songStartOffset, songEndOffset, backgroundScale, backgroundScale);
@@ -33,6 +35,10 @@ int main() {
 	centerpiece->Fade(songStartOffset, songStart, 0.0f, 1.0f);
 	centerpiece->Fade(songEnd, songEndOffset, 1.0f, 0.0f);
 	centerpiece->Scale(songStartOffset, songStartOffset, centerpieceScale, centerpieceScale);
+
+	// Read in files
+	rotationTimings = readRotationTimings(rotationTimingsPath);
+	scaleOffRanges = readScaleOffRanges(scaleOffRangesPath);
 
 	// Parse in hit objects into notes and holds
 	std::cout << "Handling particles..." << std::endl;
@@ -74,10 +80,39 @@ int main() {
 				// Choose a random direction and rotate/move particle 
 				int rotationDeg = rand() % 360;
 				float rotation = dToR(rotationDeg);
-				particle->Rotate(particleStart, particleEnd, rotation, rotation);
-				Vector2 startPos(midpoint.x + cos(rotation) * particleBuffer, midpoint.y + sin(rotation) * particleBuffer);
-				Vector2 endPos(midpoint.x + cos(rotation) * particleDistance, midpoint.y + sin(rotation) * particleDistance);
-				particle->Move(particleStart, particleEnd, startPos, endPos);
+
+				// Set up particle to be in starting position
+				particle->rotation = rotation;
+				float startPosX = cos(rotation) * particleBuffer + midpoint.x;
+				float startPosY = sin(rotation) * particleBuffer + midpoint.y;
+				Vector2 startPos(startPosX, startPosY);
+				particle->position = startPos;
+
+				// Find current rotation speed
+				float rotationPower = rotationTimings[0].power;
+				for (auto rotationTiming : rotationTimings) {
+					if (particleStart >= rotationTiming.start) {
+						rotationPower = rotationTiming.power;
+						break;
+					}
+				}
+
+				// Break up into discrete chunks to have a smooth rotation
+				float discretePeriod = (particleEnd - particleStart) / (float) particleDiscretes;
+				float discreteRotation = dToR(particleRotateAmount) * rotationPower / particleDiscretes;
+				float discreteDistance = particleDistance / particleDiscretes;
+				for (float k = particleStart; k < particleEnd; k += discretePeriod) {
+					int startTime = k;
+					int endTime = k + discretePeriod;
+
+					float targetRotation = particle->rotation + discreteRotation;
+					particle->Rotate(startTime, endTime, particle->rotation, targetRotation);
+
+					float endPosX = cos(targetRotation) * discreteDistance + particle->position.x;
+					float endPosY = sin(targetRotation) * discreteDistance + particle->position.y;
+					Vector2 endPos(endPosX, endPosY);
+					particle->Move(startTime, endTime, particle->position, endPos);
+				}
 
 				particle->Scale(particleStart, particleStart, particleScale, particleScale);
 
@@ -88,7 +123,6 @@ int main() {
 
 	// Handle scale
 	std::cout << "Handling scale..." << std::endl;
-	scaleOffRanges = readScaleOffRanges(scaleOffRangesPath);
 	// Making a copy because I have to reference the particle list in order to find what
 	// particles are active at what time, and to make my work more efficient I pop off
 	// the first values when I'm done. I don't want to use the original because I may still
@@ -132,21 +166,8 @@ int main() {
 		}
 	}
 
-	//// Handle the first bar scaling
-	//// The rotation section will handle all the rest of the scaling below
-	//for (auto bar : Spectrum::Instance()->bars) {
-	//	Vector2 barPos = bar->position;
-	//	float rotationCorrection = bar->rotation - M_PI / 2;
-	//	float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
-	//	float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
-	//	Vector2 scaledPos(scaledPosX, scaledPosY);
-
-	//	bar->Move(songStartOffset, songStart, barPos, scaledPos);
-	//}
-
 	// Handle rotation
 	std::cout << "Handling rotations..." << std::endl;
-	rotationTimings = readRotationTimings(rotationTimingsPath);
 	for (int i = 0; i < rotationTimings.size(); ++i) {
 		int endTime;
 		if (i != rotationTimings.size() - 1) {

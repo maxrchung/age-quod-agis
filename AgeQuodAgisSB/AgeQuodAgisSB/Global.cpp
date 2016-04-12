@@ -6,7 +6,9 @@
 #include <fstream>
 
 // Set this between 1 to 0 to indicate how much of the map to process
-float debugSize = 0.25f;
+float debugSize = 1.0f;
+// Generate spectrum
+bool debugSpectrum = true;
 
 // Path setup
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
@@ -40,19 +42,19 @@ int particleCount = 1;
 float particleDistance = 500.0f;
 float particleBuffer = 40.0f;
 float particleScale = 0.03f;
-float particleOpacityMin = 0.1f;
-float particleOpacityMax = 1.0f;
+float particleOpacityMin = 0.2f;
+float particleOpacityMax = 0.6f;
 int particleFadeOut = mspb * 8;
 int particleFadeIn = mspb;
 int particleFrequency = 2 * mspb;
-int particleRotateAmount = 10;
+int particleRotateAmount = -270;
+// How many times to divide for particle rotation
+int particleDiscretes = 20;
 
 // Other
 Vector2 midpoint(320, 240);
 float scaleUp = 1.15f;
 float scaleOffset = mspb;
-// In degrees
-int rotateAmount = 30;
 float centerpieceScale = 0.15f;
 
 // Setup background
