@@ -86,46 +86,6 @@ int main() {
 		}
 	}
 
-	// Handle rotation
-	std::cout << "Handling rotations..." << std::endl;
-	rotationTimings = readRotationTimings(rotationTimingsPath);
-
-	for (int i = 0; i < rotationTimings.size(); ++i) {
-		int endTime;
-		if (i != rotationTimings.size() - 1) {
-			endTime = rotationTimings[i + 1].start;
-		}
-		else {
-			endTime = songEndOffset;
-		}
-		int timeDiff = endTime - rotationTimings[i].start;
-
-		// power * rotationFreq / rotationPeriod = overallRotation / timeDiff
-		float overallRotation = rotationTimings[i].power * rotationFreq * timeDiff / rotationPeriod;
-		centerpiece->Rotate(rotationTimings[i].start, endTime, centerpiece->rotation, centerpiece->rotation+ overallRotation);
-
-		// Need to discretely move bars so they can smoothly move around in a circle
-		int discretePeriod = rotationPeriod / rotationDiscretes;
-		float discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
-		for (auto bar : Spectrum::Instance()->bars) {
-			for (float j = discretePeriod; j < timeDiff; j += discretePeriod) {
-				float startMoveTime = rotationTimings[i].start + j - discretePeriod;
-				float endMoveTime = startMoveTime + discretePeriod;
-
-				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
-
-				// Need to discretely move around the centerpiece
-				float rotationCorrection = bar->rotation - M_PI / 2;
-				Vector2 barPos = bar->position;
-				float rotatedPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer + midpoint.x;
-				float rotatedPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer + midpoint.y;
-				Vector2 rotatedPos(rotatedPosX, rotatedPosY);
-
-				bar->Move(startMoveTime, endMoveTime, bar->position, rotatedPos);
-			}
-		}
-	}
-
 	// Handle scale
 	std::cout << "Handling scale..." << std::endl;
 	scaleOffRanges = readScaleOffRanges(scaleOffRangesPath);
@@ -156,25 +116,95 @@ int main() {
 			centerpiece->Scale(startOffset, i, centerpieceScale, centerpieceScale * scaleUp);
 			centerpiece->Scale(i, endOffset, centerpieceScale * scaleUp, centerpieceScale);
 
-			for (auto bar : Spectrum::Instance()->bars) {
-				//bar->Scale(startOffset, i, 1.0f, Spectrum::Instance()->barScaleUp);
-				//bar->Scale(i, endOffset, Spectrum::Instance()->barScaleUp, 1.0f);
-
-				//Vector2 barPos = bar->position;
-				//float rotationCorrection = bar->rotation - M_PI / 2;
-				//float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
-				//float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
-				//Vector2 scaledPos(scaledPosX, scaledPosY);
-
-				//bar->Move(startOffset, i, barPos, scaledPos);
-				//bar->Move(i, endOffset, scaledPos, barPos);
-			}
-
 			for (auto particle : particleCopy) {
 				if (particle->endTime - particleFadeOut <= i) {
 					particle->Scale(startOffset, i, particleScale, particleScale * scaleUp);
 					particle->Scale(i, endOffset, particleScale * scaleUp, particleScale);
 				}
+			}
+
+			// If you want to scale the bars, uncomment below
+			// Personally, I liked it more without scaling
+			//for (auto bar : Spectrum::Instance()->bars) {
+				//bar->Scale(startOffset, i, 1.0f, Spectrum::Instance()->barScaleUp);
+				//bar->Scale(i, endOffset, Spectrum::Instance()->barScaleUp, 1.0f);
+			//}
+		}
+	}
+	// Handle the first bar scaling
+	// Rotation will handle all the rest of the scaling below since the movement is correlated with both rotation and scaling
+
+	for (auto bar : Spectrum::Instance()->bars) {
+		Vector2 barPos = bar->position;
+		float rotationCorrection = bar->rotation - M_PI / 2;
+		float scaledPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.x;
+		float scaledPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * Spectrum::Instance()->barScaleUp + midpoint.y;
+		Vector2 scaledPos(scaledPosX, scaledPosY);
+
+		bar->Move(songStartOffset, songStart, barPos, scaledPos);
+	}
+
+	// Handle rotation
+	std::cout << "Handling rotations..." << std::endl;
+	rotationTimings = readRotationTimings(rotationTimingsPath);
+	for (int i = 0; i < rotationTimings.size(); ++i) {
+		int endTime;
+		if (i != rotationTimings.size() - 1) {
+			endTime = rotationTimings[i + 1].start;
+		}
+		else {
+			endTime = songEndOffset;
+		}
+		int timeDiff = endTime - rotationTimings[i].start;
+
+		// power * rotationFreq / rotationPeriod = overallRotation / timeDiff
+		float overallRotation = rotationTimings[i].power * rotationFreq * timeDiff / rotationPeriod;
+		centerpiece->Rotate(rotationTimings[i].start, endTime, centerpiece->rotation, centerpiece->rotation + overallRotation);
+
+		// Need to discretely move bars so they can smoothly move around in a circle
+		for (auto bar : Spectrum::Instance()->bars) {
+			int discretePeriod = rotationPeriod / rotationDiscretes;
+			float discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
+			// Used to handle when to scale; checking modulus with floats can be tricky, so I had to resort
+			// to using such the updating counter below to find when to scale the bars appropriately
+			int scaleCounter = 0;
+			int j;
+			for (j = rotationTimings[i].start; j < endTime; j += discretePeriod) {
+				float startMoveTime = j;
+				float endMoveTime = startMoveTime + discretePeriod;
+
+				// Because timeDiff may not divide evenly into discretePeriod,
+				// we need to account for the last iteration individually
+				if (endTime - j <= discretePeriod) {
+					endMoveTime = endTime;
+					discretePeriod = endTime - j;
+					discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
+				}
+
+				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
+
+				float barScale = 1.0f;
+				scaleCounter += discretePeriod;
+				if (scaleCounter % (int)scaleOffset == 0) {
+					barScale = Spectrum::Instance()->barScaleUp;
+				}
+				else {
+					// Don't scale if in the scale off regions
+					for (auto range : scaleOffRanges) {
+						if (j > range.begin && j < range.end) {
+							barScale = 1.0f;
+							break;
+						}
+					}
+				}
+
+				// Discretely move around the centerpiece
+				float rotationCorrection = bar->rotation - M_PI / 2;
+				Vector2 barPos = bar->position;
+				float rotatedPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * barScale + midpoint.x;
+				float rotatedPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * barScale + midpoint.y;
+				Vector2 rotatedPos(rotatedPosX, rotatedPosY);
+				bar->Move(startMoveTime, endMoveTime, bar->position, rotatedPos);
 			}
 		}
 	}

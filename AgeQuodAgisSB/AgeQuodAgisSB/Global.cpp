@@ -49,7 +49,7 @@ int particleRotateAmount = 10;
 
 // Other
 Vector2 midpoint(320, 240);
-float scaleUp = 1.2f;
+float scaleUp = 1.15f;
 float scaleOffset = mspb;
 // In degrees
 int rotateAmount = 30;
@@ -148,7 +148,7 @@ std::vector<Range> readScaleOffRanges(std::string filePath) {
 // Base amount to spin
 float rotationFreq = 2 * M_PI;
 float rotationPeriod = mspb * 20;
-float rotationDiscretes = 40;
+float rotationDiscretes = rotationPeriod / offset;
 // Read in times for when rotation should change in the map
 std::vector<RotationTiming> rotationTimings;
 std::string rotationTimingsPath = R"(C:\Users\Wax Chug da Gwad\Desktop\age-quod-agis\AgeQuodAgisSB\AgeQuodAgisSB\RotationMap.txt)";
