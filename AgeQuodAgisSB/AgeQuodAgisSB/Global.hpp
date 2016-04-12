@@ -8,6 +8,7 @@
 #include "Sprite.hpp"
 
 extern float debugSize;
+extern float debugScaleSize;
 extern bool debugSpectrum;
 
 extern std::string snowflakeBase;
@@ -23,7 +24,7 @@ extern float bpm;
 extern float mpb;
 extern float spb;
 extern float mspb;
-extern int offset;
+extern float offset;
 
 extern int songStart;
 extern int songStartOffset;

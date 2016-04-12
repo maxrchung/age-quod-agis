@@ -7,6 +7,7 @@
 
 // Set this between 1 to 0 to indicate how much of the map to process
 float debugSize = 1.0f;
+float debugScaleSize = debugSize;
 // Generate spectrum
 bool debugSpectrum = true;
 
@@ -27,7 +28,7 @@ float mpb = 1 / bpm;
 float spb = mpb * 60;
 // ~429 ms per beat
 float mspb = 1000 * spb;
-int offset = mspb / 4;
+float offset = mspb / 4;
 
 // Overall timing
 int songStart = 1692;

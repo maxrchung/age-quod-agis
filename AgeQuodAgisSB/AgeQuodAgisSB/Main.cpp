@@ -128,7 +128,7 @@ int main() {
 	// the first values when I'm done. I don't want to use the original because I may still
 	// need it for other things.
 	std::deque<Sprite*> particleCopy = particles;
-	for (int i = songStart; i <= songEndOffset * debugSize; i += scaleOffset) {
+	for (float i = songStart; i <= songEndOffset * debugScaleSize; i += scaleOffset) {
 		while (particleCopy.size() > 0 && particleCopy.front()->endTime <= i) {
 			particleCopy.pop_front();
 		}
@@ -184,14 +184,18 @@ int main() {
 
 		// Need to discretely move bars so they can smoothly move around in a circle
 		for (auto bar : Spectrum::Instance()->bars) {
-			int discretePeriod = rotationPeriod / rotationDiscretes;
+			float discretePeriod = rotationPeriod / rotationDiscretes;
 			float discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
-			// Used to handle when to scale; checking modulus with floats can be tricky, so I had to resort
-			// to using such the updating counter below to find when to scale the bars appropriately
+
+			// Trying to perform fmod on j below led to some problems, so using this counter was
+			// my solution to properly scaling the bars
 			int scaleCounter = 0;
-			int j;
+			int scaleDivisor = scaleOffset / offset;
+
 			// This is kind of my awkward solution to solving some edge case issues
 			bool endLoop = false;
+
+			float j;
 			for (j = rotationTimings[i].start; ; j += discretePeriod) {
 				if (j >= endTime - discretePeriod) {
 					endLoop = true;
@@ -211,21 +215,19 @@ int main() {
 				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
 
 				float barScale = 1.0f;
-				if (scaleCounter % (int)scaleOffset == 0) {
+				if (scaleCounter++ % scaleDivisor == 0) {
 					barScale = Spectrum::Instance()->barScaleUp;
 				}
 				// Don't scale if in the scale off regions
 				for (auto range : scaleOffRanges) {
-					if (j > range.begin && j < range.end) {
+					if (j >= range.begin && j < range.end) {
 						barScale = 1.0f;
 						break;
 					}
 				}
-				scaleCounter += discretePeriod;
 
 				// Discretely move around the centerpiece
 				float rotationCorrection = bar->rotation - M_PI / 2;
-				Vector2 barPos = bar->position;
 				float rotatedPosX = cos(rotationCorrection) * Spectrum::Instance()->barBuffer * barScale + midpoint.x;
 				float rotatedPosY = sin(rotationCorrection) * Spectrum::Instance()->barBuffer * barScale + midpoint.y;
 				Vector2 rotatedPos(rotatedPosX, rotatedPosY);
