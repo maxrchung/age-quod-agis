@@ -125,6 +125,9 @@ int getNextLane(int lane, int index) {
 // Don't scale in these sections
 std::vector<Range> scaleOffRanges;
 std::string scaleOffRangesPath = R"(C:\Users\Wax Chug da Gwad\Desktop\age-quod-agis\AgeQuodAgisSB\AgeQuodAgisSB\ScaleOffRanges.txt)";
+// Float values can get inaccurate after repetitive adding, so 
+// I'm making a scale buffer to account for such discrepancies
+int scaleBuffer = 2;
 std::vector<Range> readScaleOffRanges(std::string filePath) {
 	std::vector<Range> ranges;
 	std::ifstream scaleFile(filePath);
@@ -142,7 +145,7 @@ std::vector<Range> readScaleOffRanges(std::string filePath) {
 
 		scaleFile >> startTime;
 		scaleFile >> endTime;
-		ranges.push_back(Range(startTime, endTime));
+		ranges.push_back(Range(startTime + scaleBuffer, endTime - scaleBuffer));
 	}
 
 	return ranges;

@@ -190,7 +190,7 @@ int main() {
 			// Trying to perform fmod on j below led to some problems, so using this counter was
 			// my solution to properly scaling the bars
 			int scaleCounter = 0;
-			// This looks wrong obviously, but because I need to keep the discretePeriod the same,
+			// This looks wrong, but because I need to keep the discretePeriod the same,
 			// we have to keep the scaleDivisor at the same rate
 			int scaleDivisor = scaleOffset / offset;
 
@@ -199,22 +199,12 @@ int main() {
 
 			float j;
 			for (j = rotationTimings[i].start; ; j += discretePeriod) {
-				if (j >= endTime - discretePeriod) {
+				if (j > endTime - discretePeriod) {
 					endLoop = true;
 				}
 
 				float startMoveTime = j - discretePeriod;
 				float endMoveTime = startMoveTime + discretePeriod;
-
-				// Because timeDiff may not divide evenly into discretePeriod,
-				// we need to account for the last iteration individually
-				if (endLoop) {
-					endMoveTime = endTime - discretePeriod;
-					discretePeriod = endTime - j;
-					discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
-				}
-
-				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
 
 				float barScale = 1.0f;
 				if (scaleCounter++ % scaleDivisor == 0) {
@@ -222,11 +212,22 @@ int main() {
 				}
 				// Don't scale if in the scale off regions
 				for (auto range : scaleOffRanges) {
-					if (j >= range.begin && j < range.end) {
+					if (endMoveTime > range.begin && endMoveTime < range.end) {
 						barScale = 1.0f;
 						break;
 					}
 				}
+
+				// Because timeDiff may not divide evenly into discretePeriod,
+				// we need to account for the last iteration individually
+				if (endLoop) {
+					endMoveTime = endTime - discretePeriod;
+					discretePeriod = endTime - discretePeriod - (j - discretePeriod);
+					discreteRotation = rotationFreq * rotationTimings[i].power * discretePeriod / rotationPeriod;
+					barScale = 1.0f;
+				}
+
+				bar->Rotate(startMoveTime, endMoveTime, bar->rotation, bar->rotation + discreteRotation);
 
 				// Discretely move around the centerpiece
 				float rotationCorrection = bar->rotation - M_PI / 2;
