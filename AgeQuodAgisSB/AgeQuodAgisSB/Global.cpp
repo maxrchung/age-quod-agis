@@ -48,7 +48,7 @@ float particleOpacityMax = 0.6f;
 int particleFadeOut = mspb * 8;
 int particleFadeIn = mspb;
 int particleFrequency = 2 * mspb;
-int particleRotateAmount = -270;
+int particleRotateAmount = 270;
 // How many times to divide for particle rotation
 int particleDiscretes = 10;
 
@@ -152,7 +152,7 @@ std::vector<Range> readScaleOffRanges(std::string filePath) {
 }
 
 // Base amount to spin
-float rotationFreq = 2 * M_PI;
+float rotationFreq = -2 * M_PI;
 float rotationPeriod = mspb * 20;
 float rotationDiscretes = rotationPeriod / offset;
 // Read in times for when rotation should change in the map
