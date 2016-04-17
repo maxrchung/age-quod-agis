@@ -15,7 +15,7 @@ bool debugSpectrum = true;
 std::string snowflakeBase = R"(Snowflakes\snowflake)";
 std::string beatmapDirectory = R"(C:\Users\Wax Chug da Gwad\AppData\Local\osu!\Songs\409783 void - Age quod agis\)";
 std::string beatmapTitle = "void - Age quod agis (TheWeirdo9)";
-std::string difficultyName = "[Age quod agis]";
+std::string difficultyName = "[Aequaliter Nubila]";
 std::string beatmapPath = beatmapDirectory + beatmapTitle + " " + difficultyName + ".osu";
 std::string storyboardPath = beatmapDirectory + beatmapTitle + ".osb";
 // Due to how I analyze the music, the song must be mono/single channel
@@ -33,8 +33,8 @@ float offset = mspb / 4;
 // Overall timing
 int songStart = 1692;
 int songStartOffset = songStart - mspb;
-int songEnd = 303406;
-int songEndOffset = songEnd + mspb;
+int songEnd = 359977;
+int songEndOffset = songEnd + mspb * 8;
 
 // Particles
 // Deque because we need to remove front particles if there're too many
